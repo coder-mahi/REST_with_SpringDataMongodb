@@ -1,11 +1,12 @@
 package com.mahesh.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+//import java.util.ArrayList;
+//import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
+import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,57 +20,74 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mahesh.entity.User;
+import com.mahesh.service.UserEntryService;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 	@Autowired
-	private User user;
+	private UserEntryService userEntryService;
 	
-	Map<Long, User> userEntries = new HashMap<>();
+//	private Map<ObjectId, User> userEntries = new HashMap<>();
 	
 	@GetMapping
 	public List<User> getAll(){
-		return new ArrayList<>(userEntries.values());
+//		return new ArrayList<>(userEntries.values());
+		
+		return userEntryService.getAll();
 	}
 	
 	@GetMapping("/id/{myid}")
-	public ResponseEntity<?> findById(@PathVariable long myid) {
-		if(userEntries.containsKey(myid)) {
-			return new ResponseEntity<User>(userEntries.get(myid),HttpStatus.OK);
-		}else {
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> findUserById(@PathVariable ObjectId myid) {
+		Optional<User> userEntry = userEntryService.findById(myid);
+		if(userEntry.isPresent()) {
+			return new ResponseEntity<>(userEntry.get(),HttpStatus.OK);
 		}
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 	
 	@PostMapping
-	public ResponseEntity<User> saveUser(@RequestBody User newUser) {
+	public ResponseEntity<?> saveUser(@RequestBody User newUser) {
+//		try {
+//			userEntries.put(newUser.getId(), newUser);
+//			return new ResponseEntity<User>(newUser,HttpStatus.OK);
+//		}catch(Exception e) {
+//			return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
+//		}
+		
 		try {
-			userEntries.put(newUser.getId(), newUser);
+			userEntryService.saveEntry(newUser);
 			return new ResponseEntity<>(newUser,HttpStatus.OK);
 		}catch(Exception e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(newUser,HttpStatus.NOT_FOUND);
 		}
 	}
 	
 	@DeleteMapping("/id/{myid}")
-	public ResponseEntity<?> findUserEntity(@PathVariable long myid){
+	public ResponseEntity<?> findUserEntity(@PathVariable ObjectId myid){
 		try {
-			userEntries.remove(myid);
+//			userEntries.remove(myid);
+			userEntryService.deleteById(myid);
 			return new ResponseEntity<User>(HttpStatus.OK);
 		}catch(Exception e) {
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
 		}
 	}
 	
+	
 	@PutMapping("/id/{myid}")
-	public ResponseEntity<?> updateUserEntity(@PathVariable long myid,@RequestBody User newUser){
-		try{
-			userEntries.replace(myid, newUser);
-			return new ResponseEntity<User>(newUser,HttpStatus.OK);
-		}catch(Exception e) {
-			return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
-		}
+	public ResponseEntity<?> updateUserEntity(@PathVariable ObjectId myid, @RequestBody User newUser) {
+	    User old = userEntryService.findById(myid).orElse(null);
+	    if (old != null) {
+	        old.setId(newUser.getId() != null ? newUser.getId() : old.getId());
+	        old.setName(newUser.getName() != null && !newUser.getName().equals("") ? newUser.getName() : old.getName());
+	        old.setEmail(newUser.getEmail() != null && !newUser.getEmail().equals("") ? newUser.getEmail() : old.getEmail());
+
+	        userEntryService.saveEntry(old);
+	        return new ResponseEntity<>(old, HttpStatus.OK);
+	    }
+	    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
+
 	
 }

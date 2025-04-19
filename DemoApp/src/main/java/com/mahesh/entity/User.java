@@ -1,24 +1,25 @@
 package com.mahesh.entity;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.stereotype.Component;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Component
+@Document(collection="user_entries")
 public class User {
 	@Id
-	private long id;
+	private ObjectId id;
 	private String name;
 	private String email;
-	public long getId() {
+	public ObjectId getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(ObjectId id) {
 		this.id = id;
 	}
-	public String getNameString() {
+	public String getName() {
 		return name;
 	}
-	public void setNameString(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 	public String getEmail() {
@@ -27,5 +28,6 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
 	
 }
