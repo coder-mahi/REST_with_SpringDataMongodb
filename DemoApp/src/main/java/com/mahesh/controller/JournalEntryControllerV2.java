@@ -21,7 +21,6 @@ import com.mahesh.service.JournalEntryService;
 @RestController
 @RequestMapping("/journal")
 public class JournalEntryControllerV2 {
-	
 	@Autowired
 	private JournalEntryService journalEntryService;
 	

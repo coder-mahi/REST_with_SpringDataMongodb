@@ -6,6 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.mahesh.entity.JournalEntry;
 
 public interface JournalEntryRepository extends MongoRepository<JournalEntry, ObjectId>{
-//	ObjectId --- datatype of ID
+//	ObjectId --- data-type of ID in database
 
 }
